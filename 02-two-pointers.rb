@@ -336,6 +336,41 @@ p strings_equal str1 = "xywrrmp", str2 = "xywrrmu#p"
 p strings_equal "ab##", "c#d#"
 p strings_equal "bxj##tw", "bxo#j##tw"
 
+puts "Second implementation"
+
+def strings_equal(s, t)
+  s_idx, t_idx = s.length - 1, t.length - 1
+  while s_idx >= -1 && t_idx >= -1
+    s_idx = clear_backspaces(s, s_idx)
+    t_idx = clear_backspaces(t, t_idx)
+    return false if s_idx >= 0 && t_idx >= 0 && s[s_idx] != t[t_idx]
+    s_idx -= 1
+    t_idx -= 1
+  end
+  true
+end
+
+def clear_backspaces(str, idx)
+  backspaces = 0
+  while idx >= 0
+    if str[idx] == "#"
+      backspaces += 1
+    elsif backspaces > 0
+      backspaces -= 1
+    else
+      break
+    end
+    idx -= 1
+  end
+  idx
+end
+
+p strings_equal str1 = "xy#z", str2 = "xzz#"
+p strings_equal str1 = "xy#z", str2 = "xyz#"
+p strings_equal str1 = "xywrrmp", str2 = "xywrrmu#p"
+p strings_equal "ab##", "c#d#"
+p strings_equal "bxj##tw", "bxo#j##tw"
+
 puts "Minimum window sort"
 
 def min_window_sort(nums)

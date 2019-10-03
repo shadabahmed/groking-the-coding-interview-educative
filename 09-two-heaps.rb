@@ -350,7 +350,7 @@ def next_interval(intervals)
     max_end_time.insert(idx)
   end
 
-  0.upto(intervals.length - 1) do |idx|
+  intervals.length.times do
     idx = max_end_time.remove_top
     start_time, end_time = intervals[idx]
     if !max_start_time.empty? && intervals[max_start_time.top][0] >= end_time && intervals[max_start_time.top][0] != start_time
@@ -361,6 +361,33 @@ def next_interval(intervals)
       res[idx] = last_top
       max_start_time.insert(last_top)
     end
+  end
+  res
+end
+
+p next_interval [[2, 3], [3, 4], [5, 6]]
+p next_interval [[3, 4], [1, 5], [4, 6]]
+
+p next_interval [[2, 2], [3, 3], [4, 4]]
+
+def next_interval(intervals)
+  max_end_time = Heap.new { |a, b| intervals[a][1] > intervals[b][1] }
+  max_start_time = Heap.new { |a, b| intervals[a][0] > intervals[b][0] }
+  res = [-1] * intervals.length
+  0.upto(intervals.length - 1) do |idx|
+    max_start_time.insert(idx)
+    max_end_time.insert(idx)
+  end
+
+  while !max_end_time.empty?
+    idx = max_end_time.remove_top
+    start_time, end_time = intervals[idx]
+    last_removed = -1
+    while !max_start_time.empty? && intervals[max_start_time.top][0] >= end_time && intervals[max_start_time.top][0] > start_time
+      last_removed = max_start_time.remove_top
+    end
+    res[idx] = last_removed if last_removed != idx
+    max_start_time.insert(last_removed) if last_removed != -1
   end
   res
 end

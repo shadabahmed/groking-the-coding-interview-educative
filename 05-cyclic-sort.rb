@@ -120,12 +120,15 @@ def find_duplicates(nums)
     if nums[idx] != nums[other_idx]
       nums[idx], nums[other_idx] = nums[other_idx], nums[idx]
     else
+      if other_idx != idx
+        res << nums[idx]
+      end
       idx += 1
     end
   end
-  0.upto(nums.length - 1) do |idx|
-    res << nums[idx] if nums[idx] != idx + 1
-  end
+  # 0.upto(nums.length - 1) do |idx|
+  #   res << nums[idx] if nums[idx] != idx + 1
+  # end
   res
 end
 
@@ -172,11 +175,44 @@ def smallest_positive_missing_number(nums)
   nums.length + 1
 end
 
+def smallest_positive_missing_number(nums)
+  idx = 0
+  while idx < nums.length
+    other_idx = nums[idx] - 1
+    if other_idx < nums.length && other_idx >= 0 && nums[idx] != nums[other_idx]
+      nums[idx], nums[other_idx] = nums[other_idx], nums[idx]
+    else
+      idx += 1
+    end
+  end
+  1.upto(nums.length).find { |num| nums[num - 1] != num } || nums.length + 1
+end
+
 p smallest_positive_missing_number [-3, 1, 5, 4, 2]
 p smallest_positive_missing_number [3, -2, 0, 1, 2]
 p smallest_positive_missing_number [3, 2, 5, 1]
 
 puts "Find first k missing numbers"
+
+def first_k_missing(nums, k)
+  idx = 0
+  while idx < nums.length
+    other_idx = nums[idx] - 1
+    if other_idx < nums.length && other_idx >= 0 && nums[idx] != nums[other_idx]
+      nums[idx], nums[other_idx] = nums[other_idx], nums[idx]
+    else
+      idx += 1
+    end
+  end
+  1.upto(nums.length) do |num|
+    break if k.zero?
+    if nums[num - 1] != num
+      res << num
+      k -= 1
+    end
+  end
+  k > 0 ? res + (nums.length + 1).upto(nums.length + k).to_a : res
+end
 
 def find_first_k_missing(nums, k)
   next_k_nums, idx = [], 0
@@ -197,6 +233,33 @@ def find_first_k_missing(nums, k)
       res << num
     end
     break if res.length == k
+  end
+  res
+end
+
+p find_first_k_missing [3, -1, 4, 5, 6], 3
+p find_first_k_missing [2, 3, 4], 3
+p find_first_k_missing [-2, -3, 4], 2
+
+def find_first_k_missing(nums, k)
+  idx, res, extras = 0, [], Set.new
+  while idx < nums.length
+    other_idx = nums[idx] - 1
+    if other_idx < nums.length && other_idx >= 0 && nums[idx] != nums[other_idx]
+      nums[idx], nums[other_idx] = nums[other_idx], nums[idx]
+    else
+      if other_idx >= nums.length && other_idx < nums.length + k
+        extras.add(other_idx + 1)
+      end
+      idx += 1
+    end
+  end
+  1.upto(nums.length + k) do |num|
+    break if k.zero?
+    if (num <= nums.length && nums[num - 1] != num) || (num > nums.length && !extras.include?(num))
+      res << num
+      k -= 1
+    end
   end
   res
 end

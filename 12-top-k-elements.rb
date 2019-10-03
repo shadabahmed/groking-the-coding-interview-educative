@@ -399,6 +399,36 @@ end
 p sum_between_smallest [1, 3, 12, 5, 15, 11], 3, 6
 p sum_between_smallest [3, 5, 8, 7], 1, 4
 
+def sum_between_smallest(nums, k1, k2)
+  k1_pq = Heap.new { |a, b| a > b }
+  k2_pq = Heap.new { |a, b| a > b }
+  sum = 0
+  nums.each do |num|
+    inserted = false
+    if k1_pq.size < k1
+      inserted = true
+      k1_pq.insert(num)
+    elsif num < k1_pq.top
+      removed_num = k1_pq.remove_top
+      k1_pq.insert(num)
+      num = removed_num
+    end
+
+    next if inserted
+    if k2_pq.size < k2 - k1 - 1
+      sum += num
+      k2_pq.insert(num)
+    elsif num < k2_pq.top
+      sum += num - k2_pq.remove_top
+      k2_pq.insert(num)
+    end
+  end
+  sum
+end
+
+p sum_between_smallest [1, 3, 12, 5, 15, 11], 3, 6
+p sum_between_smallest [3, 5, 8, 7], 1, 4
+
 puts "Rearrange String"
 
 def rearrange_string(str)
@@ -443,7 +473,6 @@ def rearrange_string_k_apart(str, k)
   while !pq.empty?
     top = pq.remove_top
     res << top
-    freq_map[top] -= 1
     queue << top
     if queue.size >= k
       first = queue.shift
@@ -457,6 +486,7 @@ def rearrange_string_k_apart(str, k)
   res.length == str.length ? res : ""
 end
 
+p rearrange_string_k_apart "abcdefg", 20
 p rearrange_string_k_apart "mmpp", 2
 p rearrange_string_k_apart "Programming", 3
 p rearrange_string_k_apart "aab", 2

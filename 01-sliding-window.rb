@@ -2,16 +2,11 @@ puts "AVG of all subarrays of size k"
 
 def averages_of_size_k(nums, k)
   res = []
-  return res if k > nums.size
   window_sum = 0
-  0.upto(k - 1) do |idx|
+  0.upto(nums.length - 1) do |idx|
     window_sum += nums[idx]
-  end
-  res << window_sum.to_f / k
-  k.upto(nums.length - 1) do |idx|
-    window_sum -= nums[idx - k]
-    window_sum += nums[idx]
-    res << window_sum.to_f / k
+    window_sum -= nums[idx - k] if idx >= k
+    res << window_sum.to_f / k if idx >= k - 1
   end
   res
 end
@@ -295,6 +290,28 @@ def has_permutation(str, pattern)
   false
 end
 
+def has_permutation(str, pattern)
+  char_freq = Hash.new(0)
+  pattern.each_char { |c| char_freq[c] += 1 }
+  char_set = Set.new(char_freq.keys)
+  first, matched = 0, 0
+  0.upto(str.length - 1) do |last|
+    if char_set.include?(str[last])
+      char_freq[str[last]] -= 1
+      matched += 1 if char_freq[str[last]].zero?
+    end
+    if last - first + 1 > pattern.length
+      if char_set.include?(str[first])
+        matched -= 1 if char_freq[str[first]].zero?
+        char_freq[str[first]] += 1
+      end
+      first += 1
+    end
+    return true if matched == char_set.length
+  end
+  false
+end
+
 p has_permutation "oidbcaaf", "abbc"
 p has_permutation "oidbcaf", "abc"
 p has_permutation "odicf", "dc"
@@ -316,6 +333,35 @@ def find_anagrams(str, p)
       first += 1
     end
     res.push(first) if seen.size == match.size && last - first == p.length
+  end
+  res
+end
+
+p find_anagrams "ppqp", "pq"
+p find_anagrams "abbcabc", "abc"
+p find_anagrams "cbaebabacd", "abc"
+
+def find_anagrams(str, p)
+  res = []
+  match = Hash.new(0)
+  p.each_char { |c| match[c] += 1 }
+  char_set = Set.new(match.keys)
+  match_len, first = 0, 0
+  0.upto(str.length - 1) do |last|
+    if char_set.include?(str[last])
+      match[str[last]] -= 1
+      match_len += 1 if match[str[last]].zero?
+    end
+
+    if last - first + 1 > p.length
+      if char_set.include?(str[first])
+        match_len -= 1 if match[str[first]].zero?
+        match[str[first]] += 1
+      end
+      first += 1
+    end
+
+    res.push(first) if match_len == char_set.size
   end
   res
 end

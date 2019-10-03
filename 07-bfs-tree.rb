@@ -282,3 +282,32 @@ end
 
 #p boundary_view(TreeNode.create_tree([12, 7, 9, 15, 13, 16]))
 p boundary_view(TreeNode.create_tree([5, 3, 2, 1, 4, 6, 7]))
+
+def boundary_view(root)
+  left, leaves, right = [], [], []
+  queue = [root]
+  while !queue.empty?
+    left_node, right_node = queue.first, queue.last
+    left << left_node.val if !(left_node.left.nil? && left_node.right.nil?)
+    right.unshift(right_node.val) if left_node != right_node && !(right_node.left.nil? && right_node.right.nil?)
+    nodes_added = false
+    queue.length.times do
+      node = queue.shift
+      if !node.left && !node.right
+        if nodes_added
+          queue << node
+        else
+          leaves << node.val
+        end
+      else
+        nodes_added = true
+        queue << node.left if node.left
+        queue << node.right if node.right
+      end
+    end
+  end
+  left + leaves + right
+end
+
+TreeNode.create_tree([5, 3, 2, 1, 4, 6, 7]).print
+p boundary_view(TreeNode.create_tree([5, 3, 2, 1, 4, 6, 7]))

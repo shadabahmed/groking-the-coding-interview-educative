@@ -189,7 +189,6 @@ def smallest_range(lists)
   while pq.size == lists.length
     min_list_idx = pq.remove_top
     min = lists[min_list_idx][list_indices[min_list_idx]]
-    min = lists[min_list_idx][list_indices[min_list_idx]]
     min_overall, max_overall = min, max if max_overall - min_overall > max - min
     list_indices[min_list_idx] += 1
     if list_indices[min_list_idx] < lists[min_list_idx].length

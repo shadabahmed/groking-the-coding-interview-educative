@@ -25,29 +25,32 @@ end
 
 puts "Reverse linked list from P to Q"
 
-def reverse_list_between(head, p, q)
+def reverse_list_between(head, first, last)
   dummy_head = ListNode.new(0, head)
-  pth_prev = get_kth(dummy_head, p - 1)
-  qth = get_kth(pth_prev, q - p + 1)
-  prev = qth.next
-  qth.next = nil
-  current = pth_prev.next
-  while current
-    nxt = current.next
-    current.next = prev
-    prev = current
-    current = nxt
-  end
-  pth_prev.next = prev
-  dummy_head.next
-end
-
-def get_kth(head, k)
-  while k > 0
+  head = dummy_head
+  while head.next && head.next.val != first
     head = head.next
-    k -= 1
   end
-  head
+  if head.next
+    tail = head.next
+    while tail && tail.val != last
+      tail = tail.next
+    end
+    prev = nil
+    if tail
+      prev = tail.next
+      tail.next = nil
+    end
+    match_head = head.next
+    while match_head
+      nxt = match_head.next
+      match_head.next = prev
+      prev = match_head
+      match_head = nxt
+    end
+    head.next = prev
+  end
+  dummy_head.next
 end
 
 head = ListNode.new(1)

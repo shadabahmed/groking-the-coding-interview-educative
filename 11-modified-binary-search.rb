@@ -54,6 +54,10 @@ def floor(nums, key)
   last
 end
 
+p floor [4, 6, 10], 6
+p floor [1, 3, 8, 10, 15], key = 12
+p floor [4, 6, 10], 17
+
 def floor(nums, key)
   first, last = 0, nums.length - 1
   while first < last
@@ -69,7 +73,7 @@ end
 
 p floor [4, 6, 10], 6
 p floor [1, 3, 8, 10, 15], key = 12
-p floor [4, 6, 10], 17
+p floor [4, 6, 10], 7
 
 puts "First Letter"
 

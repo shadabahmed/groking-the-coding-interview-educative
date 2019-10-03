@@ -16,6 +16,22 @@ def merge_intervals(intervals)
   res.push([prev_start, prev_end])
 end
 
+def merge_intervals(intervals)
+  intervals.sort_by! { |i| i[0] }
+  prev_start, prev_end = intervals.first
+  res = []
+  1.upto(intervals.length - 1) do |idx|
+    cur_start, cur_end = intervals[idx]
+    if cur_start <= prev_end
+      prev_end = [cur_end, prev_end].max
+    else
+      res << [prev_start, prev_end]
+      prev_start, prev_end = cur_start, cur_end
+    end
+  end
+  res << [prev_start, prev_end]
+end
+
 p merge_intervals [[1, 4], [2, 5], [7, 9]]
 p merge_intervals [[6, 7], [2, 4], [5, 9]]
 p merge_intervals [[1, 4], [2, 6], [3, 5]]
@@ -49,7 +65,57 @@ p insert_interval [[2, 3], [5, 7]], [1, 4]
 p insert_interval [[2, 3], [5, 7]], [-11, 40]
 p insert_interval [[2, 5], [6, 7], [8, 9]], [0, 1]
 
+p "2nd attempt"
+
+def insert_interval(intervals, interval)
+  intervals = merge_intervals(intervals)
+  int_start, int_end = interval
+  res = []
+  0.upto(intervals.length - 1) do |idx|
+    cur_start, cur_end = intervals[idx]
+    if cur_start > int_end
+      return res + [int_start, int_end] + intervals[idx..-1]
+    elsif cur_end < int_start
+      res << [cur_start, cur_end]
+    else
+      int_start, int_end = [int_start, cur_start].min, [int_end, cur_end].max
+    end
+  end
+  res << [int_start, int_end] if res.empty? || res.last.last < int_start
+  res
+end
+
+p insert_interval [[1, 3], [5, 7], [8, 12]], [4, 6]
+p insert_interval [[1, 3], [5, 7], [8, 12]], [4, 10]
+p insert_interval [[2, 3], [5, 7]], [1, 4]
+p insert_interval [[2, 3], [5, 7]], [-11, 40]
+p insert_interval [[2, 5], [6, 7], [8, 9]], [0, 1]
+
 puts "Interval intersection"
+
+def find_intersection(i1, i2)
+  idx1, idx2 = 0, 0
+  res = []
+  while idx1 < i1.length && idx2 < i2.length
+    if i1[idx1].last < i2[idx2].first
+      idx1 += 1
+    elsif i2[idx2].last < i1[idx1].first
+      idx2 += 1
+    else
+      int_start, int_end = [i1[idx1].first, i2[idx2].first].max, [i1[idx1].last, i2[idx2].last].min
+      res << [int_start, int_end]
+      if i1[idx1].last < i2[idx2].last
+        idx1 += 1
+      else
+        idx2 += 1
+      end
+    end
+  end
+  res
+end
+
+p find_intersection [[1, 3], [5, 6], [7, 9]], [[2, 3], [5, 7]]
+p find_intersection arr1 = [[1, 3], [5, 7], [9, 12]], arr2 = [[5, 10]]
 
 def find_intersection(i1, i2)
   res = []
@@ -77,6 +143,17 @@ p find_intersection [[1, 3], [5, 6], [7, 9]], [[2, 3], [5, 7]]
 p find_intersection arr1 = [[1, 3], [5, 7], [9, 12]], arr2 = [[5, 10]]
 
 puts "Conflicting appointments"
+
+def can_attend_all(appointments)
+  appointments.sort_by! { |a| a[0] }
+  1.upto(appointments.length - 1).all? do |idx|
+    appointments[idx - 1].last <= appointments[idx].first
+  end
+end
+
+p can_attend_all [[1, 4], [2, 5], [7, 9]]
+p can_attend_all [[6, 7], [2, 4], [8, 12]]
+p can_attend_all [[4, 5], [2, 3], [3, 6]]
 
 def can_attend_all(appointments)
   appointments.sort_by! { |a| a[0] }
@@ -327,6 +404,61 @@ def find_free_times(hours)
       res << [prev_finish, start]
     end
     finish_heap.insert(finish)
+  end
+  res
+end
+
+p find_free_times [[[1, 3], [5, 6]], [[2, 3], [6, 8]]]
+p find_free_times [[[1, 3], [9, 12]], [[2, 4]], [[6, 8]]]
+p find_free_times [[[1, 3]], [[2, 4]], [[3, 5], [7, 9]]]
+
+def find_free_times(hours)
+  res = []
+  working_heap = Heap.new { |finish1, finish2| finish1 < finish2 }
+  available_heap = Heap.new do |(worker_idx1, interval_idx1), (worker_idx2, interval_idx2)|
+    hours[worker_idx1][interval_idx1].first < hours[worker_idx2][interval_idx2].first
+  end
+
+  0.upto(hours.length - 1) do |worker_idx|
+    available_heap.insert([worker_idx, 0])
+  end
+
+  while !available_heap.empty?
+    worker_idx, interval_idx = available_heap.remove_top
+    start_time, finish_time = hours[worker_idx][interval_idx]
+    while !working_heap.empty? && working_heap.top <= start_time
+      last_finished = working_heap.remove_top
+    end
+    if working_heap.empty? && last_finished && start_time > last_finished
+      res << [last_finished, start_time]
+    end
+    working_heap.insert(finish_time)
+    available_heap.insert([worker_idx, interval_idx + 1]) if interval_idx < hours[worker_idx].length - 1
+  end
+  res
+end
+
+def find_free_times(hours)
+  res = []
+  start_heap = Heap.new do |(emp_idx1, int_idx1), (emp_idx2, int_idx2)|
+    hours[emp_idx1][int_idx1].first < hours[emp_idx2][int_idx2].first
+  end
+
+  0.upto(hours.length - 1) do |emp_idx|
+    start_heap.insert([emp_idx, 0]) unless hours[emp_idx].empty?
+  end
+
+  if !start_heap.empty?
+    first_emp_idx, first_int_idx = start_heap.top
+    prev_end = hours[first_emp_idx][first_int_idx].last
+
+    while !start_heap.empty?
+      emp_idx, int_idx = start_heap.remove_top
+      cur_start, cur_end = hours[emp_idx][int_idx]
+      res << [prev_end, cur_start] if cur_start > prev_end
+      prev_end = cur_end if cur_end > prev_end
+      start_heap.insert([emp_idx, int_idx + 1]) if int_idx < hours[emp_idx].length - 1
+    end
   end
   res
 end
